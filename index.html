@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodePen Clone</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #333;
+      color: #fff;
+    }
+
+    .editor {
+      flex: 1;
+      display: flex;
+      background-color: #1e1e1e;
+    }
+
+    .code-editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .CodeMirror {
+      flex: 1;
+      height: 100%;
+    }
+
+    .preview {
+      flex: 1;
+      display: flex;
+      background-color: #282828;
+    }
+
+    .preview iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .toolbar {
+      padding: 10px;
+      background-color: #1e1e1e;
+      color: #fff;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .toolbar button {
+      padding: 5px 10px;
+      margin-right: 5px;
+      background-color: #444;
+      border: none;
+      border-radius: 3px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .toolbar button:hover {
+      background-color: #555;
+    }
+
+    .toolbar button:active {
+      background-color: #333;
+    }
+
+    .dark-theme {
+      background-color: #333;
+      color: #fff;
+    }
+
+    .dark-theme .editor {
+      background-color: #1e1e1e;
+    }
+
+    .dark-theme .preview {
+      background-color: #282828;
+    }
+
+    .dark-theme .toolbar {
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="editor">
+    <div class="code-editor">
+      <div class="toolbar">
+        <button id="run-button">Run</button>
+        <button id="reset-button">Reset</button>
+        <button id="theme-button">Toggle Theme</button>
+      </div>
+      <textarea id="html-input" placeholder="HTML"></textarea>
+      <textarea id="css-input" placeholder="CSS"></textarea>
+      <textarea id="js-input" placeholder="JavaScript"></textarea>
+    </div>
+    <div class="preview">
+      <iframe id="result-frame"></iframe>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/css/css.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/javascript/javascript.js"></script>
+  <script>
+    const htmlInput = CodeMirror.fromTextArea(document.getElementById('html-input'), {
+      mode: 'htmlmixed',
+      theme: 'default',
+      lineNumbers: true,
+      lineWrapping: true,
+      autoCloseTags: true,
+      extraKeys: {
+        'Ctrl-Space': 'autocomplete'
+      },
+      hintOptions: {
+        hint: CodeMirror.hint.html,
+        completeSingle: false
+      }
+    });
+
+    const cssInput = CodeMirror.fromTextArea(document.getElementById('css-input'), {
+      mode: 'css',
+      theme: 'default',
+      lineNumbers: true,
+      lineWrapping: true,
+      autoCloseBrackets: true,
+    });
+
+    const jsInput = CodeMirror.fromTextArea(document.getElementById('js-input'), {
+      mode: 'javascript',
+      theme: 'default',
+      lineNumbers: true,
+      lineWrapping: true,
+      autoCloseBrackets: true,
+    });
+
+    const resultFrame = document.getElementById('result-frame');
+    const runButton = document.getElementById('run-button');
+    const resetButton = document.getElementById('reset-button');
+    const themeButton = document.getElementById('theme-button');
+
+    function updatePreview() {
+      const htmlCode = htmlInput.getValue();
+      const cssCode = `<style>${cssInput.getValue()}</style>`;
+      const jsCode = '<script>'+jsInput.getValue()+'';
+
+      const combinedCode = `${htmlCode}${cssCode}${jsCode}`;
+      resultFrame.srcdoc = combinedCode;
+    }
+
+    function resetEditor() {
+      htmlInput.setValue('');
+      cssInput.setValue('');
+      jsInput.setValue('');
+      updatePreview();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-theme');
+    }
+
+    runButton.addEventListener('click', updatePreview);
+    resetButton.addEventListener('click', resetEditor);
+    themeButton.addEventListener('click', toggleTheme);
+
+    // Restore code from localStorage if available
+    const storedHtmlCode = localStorage.getItem('htmlCode');
+    const storedCssCode = localStorage.getItem('cssCode');
+    const storedJsCode = localStorage.getItem('jsCode');
+
+    htmlInput.setValue(storedHtmlCode || '');
+    cssInput.setValue(storedCssCode || '');
+    jsInput.setValue(storedJsCode || '');
+
+    htmlInput.on('change', updatePreview);
+    cssInput.on('change', updatePreview);
+    jsInput.on('change', updatePreview);
+  </script>
+</body>
+</html>
